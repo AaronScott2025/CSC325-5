@@ -1,0 +1,13 @@
+.button {
+   -fx-background-color: #B56D00;
+}
+.root {
+   -fx-background-color: #D99D43;
+}
+.menu-bar {
+   -fx-background-color: #A36302;
+}
+.column-header .label {
+   -fx-background-color: #6D6D6E;
+   -fx-text-fill: white;
+}

@@ -1,8 +1,10 @@
 package com.example.module03_basicgui_db_interface;
+import com.example.module03_basicgui_db_interface.db.ConnDbOps;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.animation.FadeTransition;
 import javafx.util.Duration;
@@ -17,6 +19,7 @@ public class DB_Application extends Application {
 
 
     private Stage primaryStage;
+    private static ConnDbOps cdbop;
 
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -26,7 +29,9 @@ public class DB_Application extends Application {
     }
 
     private void showScene1() {
+        cdbop = new ConnDbOps();
         try {
+            cdbop.connectToDatabase();
             Parent root = FXMLLoader.load(getClass().getResource("splash_screen.fxml"));
             Scene scene = new Scene(root, 850, 560);
             scene.getStylesheets().add("style.css");
@@ -51,7 +56,14 @@ public class DB_Application extends Application {
             fadeOut.setOnFinished(e -> {
 
 
-                Scene newScene = new Scene(newRoot,850, 560);
+                Scene newScene = new Scene(newRoot, 850, 560);
+                newScene.setOnKeyPressed(event -> {
+                    try {
+                        handleKeyPress(event);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
                 primaryStage.setScene(newScene);
 
             });
@@ -59,6 +71,16 @@ public class DB_Application extends Application {
             fadeOut.play();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void handleKeyPress(KeyEvent event) {
+        switch (event.getCode()) {
+            case E:
+                if(event.isControlDown()) { //Ctrl + E
+                    System.exit(0);
+                }
+                break;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.module03_basicgui_db_interface;
 
+import com.example.module03_basicgui_db_interface.db.ConnDbOps;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -41,9 +42,12 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     ImageView img_view;
 
+    private static ConnDbOps cdbop;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        cdbop = new ConnDbOps();
         tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
         tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         tv_ln.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -57,15 +61,12 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void addNewRecord() {
-
-
-        data.add(new Person(
-                data.size()+1,
-                first_name.getText(),
-                last_name.getText(),
-                department.getText(),
-                major.getText()
-        ));
+        cdbop = new ConnDbOps();
+        int id = Integer.getInteger(cdbop.totalNum());
+        System.out.println(id);
+        id++;
+        String idproper = Integer.toString(id);
+        cdbop.insertUser(idproper,first_name.getText(), last_name.getText(), department.getText(), major.getText());
     }
 
     @FXML

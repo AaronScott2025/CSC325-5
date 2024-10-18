@@ -11,33 +11,35 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.*;
 import java.util.ResourceBundle;
 
 
 public class DB_GUI_Controller implements Initializable {
 
-    private final ObservableList<Person> data =
+    private ObservableList<Person> data =
             FXCollections.observableArrayList(
-                    new Person(1, "Jacob", "Smith", "CPIS", "CS"),
-                    new Person(2, "Jacob2", "Smith1", "CPIS1", "CS")
-
             );
 
 
     @FXML
-    TextField first_name, last_name, department, major;
+    TextField first_name, last_name, department, major, image, idtxt;
     @FXML
     private TableView<Person> tv;
     @FXML
     private TableColumn<Person, Integer> tv_id;
     @FXML
     private TableColumn<Person, String> tv_fn, tv_ln, tv_dept, tv_major;
+    @FXML
+    private AnchorPane panes;
 
     @FXML
     ImageView img_view;
@@ -48,6 +50,8 @@ public class DB_GUI_Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         cdbop = new ConnDbOps();
+        data = cdbop.listAllUsers(data); //data filled with Database entries
+
         tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
         tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         tv_ln.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -55,18 +59,22 @@ public class DB_GUI_Controller implements Initializable {
         tv_major.setCellValueFactory(new PropertyValueFactory<>("major"));
 
 
-        tv.setItems(data);
+        tv.setItems(data); //Put into table
     }
 
 
     @FXML
     protected void addNewRecord() {
         cdbop = new ConnDbOps();
-        int id = Integer.getInteger(cdbop.totalNum());
+        System.out.println("Here " + cdbop.totalNum()); //Total users
+        int id = (cdbop.totalNum());
         System.out.println(id);
-        id++;
-        String idproper = Integer.toString(id);
-        cdbop.insertUser(idproper,first_name.getText(), last_name.getText(), department.getText(), major.getText());
+        if(id == 0) { //Id starts with 100
+            id = 101; //First user
+        } else {
+            id = id + 100; //Every other user
+        }
+        cdbop.insertUser(id,first_name.getText(), last_name.getText(), department.getText(), major.getText(),image.getText()); //Insert based on text
     }
 
     @FXML
@@ -85,23 +93,17 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void editRecord() {
+        cdbop = new ConnDbOps();
         Person p= tv.getSelectionModel().getSelectedItem();
-        int c=data.indexOf(p);
-        Person p2= new Person();
-        p2.setId(c+1);
-        p2.setFirstName(first_name.getText());
-        p2.setLastName(last_name.getText());
-        p2.setDept(department.getText());
-        p2.setMajor(major.getText());
-        data.remove(c);
-        data.add(c,p2);
-        tv.getSelectionModel().select(c);
+        int id = tv.getSelectionModel().getSelectedItem().getId();
+        cdbop.queryAndEditUser(Integer.valueOf(idtxt.getText()),first_name.getText(), last_name.getText(), department.getText(), major.getText(),image.getText());
+
     }
 
     @FXML
     protected void deleteRecord() {
-        Person p= tv.getSelectionModel().getSelectedItem();
-        data.remove(p);
+        cdbop = new ConnDbOps();
+        cdbop.deleteUser(Integer.parseInt(idtxt.getText()));
     }
 
 
@@ -126,7 +128,35 @@ public class DB_GUI_Controller implements Initializable {
         last_name.setText(p.getLastName());
         department.setText(p.getDept());
         major.setText(p.getMajor());
+        image.setText(p.getImg());
+        idtxt.setText(String.valueOf(p.getId()));
 
 
+    }
+    @FXML
+    protected void handleKeyPress(KeyEvent event) {
+        switch (event.getCode()) {
+            case X:
+                if(event.isControlDown()) { //Ctrl + X
+                    System.exit(0);
+                }
+                break;
+            case E:
+                if(event.isControlDown()) { //Ctrl + E
+                    editRecord();
+                }
+                break;
+            case D:
+                if(event.isControlDown()) { //Ctrl + D
+                    deleteRecord();
+                }
+                break;
+            case A:
+                if(event.isControlDown()) { //Ctrl + A
+                    System.out.println("Detected");
+                    addNewRecord();
+                }
+                break;
+        }
     }
 }

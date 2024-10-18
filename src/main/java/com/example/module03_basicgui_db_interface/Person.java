@@ -8,17 +8,19 @@ public class Person {
     private String lastName;
     private String dept;
     private String major;
+    private String img;
 
     public Person() {
     }
 
 
-    public Person(Integer id, String firstName, String lastName, String dept, String major) {
+    public Person(Integer id, String firstName, String lastName, String dept, String major,String img) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.major = major;
         this.dept = dept;
+        this.img = img;
     }
 
 
@@ -66,5 +68,11 @@ public class Person {
         this.dept = dept;
     }
 
+    public String getImg() {
+        return img;
+    }
 
+    public void setImg(String img) {
+        this.img = img;
+    }
 }

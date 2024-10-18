@@ -4,6 +4,9 @@
  */
 package com.example.module03_basicgui_db_interface.db;
 
+import com.example.module03_basicgui_db_interface.Person;
+import javafx.collections.ObservableList;
+
 import java.sql.*;
 
 /**
@@ -11,8 +14,8 @@ import java.sql.*;
  * @author MoaathAlrajab
  */
 public class ConnDbOps {
-    final String MYSQL_SERVER_URL = "jdbc:mysql://scota311server.mysql.database.azure.com:3306";
-    final String DB_URL = "jdbc:mysql://scota311server.mysql.database.azure.com:3306/DBnew";
+    final String MYSQL_SERVER_URL = "jdbc:mysql://scota311server.mysql.database.azure.com/";
+    final String DB_URL = "jdbc:mysql://scota311server.mysql.database.azure.com/DBnew";
 
     final String USERNAME = "scotadmin";
     final String PASSWORD = "Farmingdale14@";
@@ -23,24 +26,25 @@ public class ConnDbOps {
 
         //Class.forName("com.mysql.jdbc.Driver");
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+//            Class.forName("com.mysql.jdbc.Driver");
             //First, connect to MYSQL server and create the database if not created
             Connection conn = DriverManager.getConnection(MYSQL_SERVER_URL, USERNAME, PASSWORD);
             Statement statement = conn.createStatement();
-            statement.executeUpdate("CREATE DATABASE IF NOT EXISTS DBname");
+            statement.executeUpdate("CREATE DATABASE IF NOT EXISTS DBnew");
             statement.close();
             conn.close();
 
             //Second, connect to the database and create the table "users" if cot created
             conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
             statement = conn.createStatement();
+            //    public Person(Integer id, String firstName, String lastName, String dept, String major,String img) {
             String sql = "CREATE TABLE IF NOT EXISTS users ("
                     + "id INT( 10 ) NOT NULL PRIMARY KEY AUTO_INCREMENT,"
-                    + "name VARCHAR(200) NOT NULL,"
-                    + "email VARCHAR(200) NOT NULL UNIQUE,"
-                    + "phone VARCHAR(200),"
-                    + "address VARCHAR(200),"
-                    + "password VARCHAR(200) NOT NULL"
+                    + "firstname VARCHAR(200) NOT NULL,"
+                    + "lastname VARCHAR(200) NOT NULL,"
+                    + "dept VARCHAR(200),"
+                    + "major VARCHAR(200),"
+                    + "img VARCHAR(200) NOT NULL"
                     + ")";
             statement.executeUpdate(sql);
 
@@ -66,23 +70,44 @@ public class ConnDbOps {
         return hasRegistredUsers;
     }
 
-    public  void queryUserByName(String name) {
+    public  void queryAndEditUser(Integer id, String firstName, String lastName, String dept, String major,String img) {
 
 
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-            String sql = "SELECT * FROM users WHERE name = ?";
+            String sql = "UPDATE users SET firstname = ?, lastname = ?, dept = ?, major = ?, img = ? WHERE id = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setString(1, name);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setString(3, dept);
+            preparedStatement.setString(4, major);
+            preparedStatement.setString(5, img);
+            preparedStatement.setInt(6, id);
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String email = resultSet.getString("email");
-                String phone = resultSet.getString("phone");
-                String address = resultSet.getString("address");
-                System.out.println("ID: " + id + ", Name: " + name + ", Email: " + email + ", Phone: " + phone + ", Address: " + address);
+            int updated = preparedStatement.executeUpdate();
+            if(updated == 1) {
+                System.out.println("Updated user of ID: " + id);
+            }
+
+            preparedStatement.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public  void deleteUser(Integer id) {
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "DELETE FROM users WHERE id = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+            preparedStatement.setInt(1, id);
+
+            int updated = preparedStatement.executeUpdate();
+            if(updated == 1) {
+                System.out.println("DELETED user of ID: " + id);
             }
 
             preparedStatement.close();
@@ -93,7 +118,7 @@ public class ConnDbOps {
         }
     }
 
-    public  ResultSet listAllUsers() {
+    public ObservableList<Person> listAllUsers(ObservableList<Person> data) {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
             String sql = "SELECT * FROM users ";
@@ -103,34 +128,36 @@ public class ConnDbOps {
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                String email = resultSet.getString("email");
-                String phone = resultSet.getString("phone");
-                String address = resultSet.getString("address");
-                System.out.println("ID: " + id + ", Name: " + name + ", Email: " + email + ", Phone: " + phone + ", Address: " + address);
+                String firstname = resultSet.getString("firstname");
+                String lastname = resultSet.getString("lastname");
+                String dept = resultSet.getString("dept");
+                String major = resultSet.getString("major");
+                String image = resultSet.getString("img");
+                Person p = new Person(id,firstname,lastname,dept,major,image);
+                data.add(p);
             }
-
             preparedStatement.close();
             conn.close();
-            return resultSet;
+            return data;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public  void insertUser(String name, String email, String phone, String address, String password) {
+    public  void insertUser(Integer id, String firstName, String lastName, String dept, String major,String img) {
 
 
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-            String sql = "INSERT INTO users (name, email, phone, address, password) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (id, firstname, lastname, dept, major,img) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, email);
-            preparedStatement.setString(3, phone);
-            preparedStatement.setString(4, address);
-            preparedStatement.setString(5, password);
+            preparedStatement.setInt(1,id);
+            preparedStatement.setString(2, firstName);
+            preparedStatement.setString(3, lastName);
+            preparedStatement.setString(4, dept);
+            preparedStatement.setString(5, major);
+            preparedStatement.setString(6, img);
 
             int row = preparedStatement.executeUpdate();
 
@@ -145,18 +172,17 @@ public class ConnDbOps {
         }
     }
 
-    public String totalNum() {
-        String number = "0";
+    public int totalNum() {
+        int number = 0;
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
             String sql = "SELECT COUNT(*) FROM users ";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-
-            number = resultSet.toString();
-            System.out.println(number);
-
+            if(resultSet.next()) {
+                number = resultSet.getInt(1);
+            }
             preparedStatement.close();
             conn.close();
         } catch (SQLException e) {

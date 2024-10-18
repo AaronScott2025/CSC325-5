@@ -18,7 +18,7 @@ public class DB_Application extends Application {
     }
 
 
-    private Stage primaryStage;
+    private static Stage primaryStage;
     private static ConnDbOps cdbop;
 
     public void start(Stage primaryStage) {
@@ -37,19 +37,19 @@ public class DB_Application extends Application {
             scene.getStylesheets().add("style.css");
             primaryStage.setScene(scene);
             primaryStage.show();
-            changeScene();
+            changeScene("login.fxml");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void changeScene() {
+    public void changeScene(String scenename) {
         try {
-            Parent newRoot = FXMLLoader.load(getClass().getResource("db_interface_gui.fxml"));
-
+            Parent newRoot = FXMLLoader.load(getClass().getResource(scenename));
             Scene currentScene = primaryStage.getScene();
             Parent currentRoot = currentScene.getRoot();
             currentScene.getStylesheets().add("style.css");
+
             FadeTransition fadeOut = new FadeTransition(Duration.seconds(3), currentRoot);
             fadeOut.setFromValue(1);
             fadeOut.setToValue(0);
@@ -57,13 +57,6 @@ public class DB_Application extends Application {
 
 
                 Scene newScene = new Scene(newRoot, 850, 560);
-                newScene.setOnKeyPressed(event -> {
-                    try {
-                        handleKeyPress(event);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                });
                 primaryStage.setScene(newScene);
 
             });
@@ -74,13 +67,7 @@ public class DB_Application extends Application {
         }
     }
 
-    private void handleKeyPress(KeyEvent event) {
-        switch (event.getCode()) {
-            case E:
-                if(event.isControlDown()) { //Ctrl + E
-                    System.exit(0);
-                }
-                break;
-        }
+    public static Stage getPrimaryStage() {
+        return primaryStage;
     }
 }
